@@ -1,0 +1,810 @@
+swagger: "2.0"
+info:
+  description: Webhooks REST API
+  version: "1.0"
+  title: Webhooks REST API
+  termsOfService: For internal use only
+  contact:
+    name: sentenial
+    url: http://sentenial.com
+    email: engineering@sentenial.com
+  license:
+    name: For internal use only
+    url: https://sentenial.com
+  x-logo:
+    backgroundColor: '#FFFFFF'
+    url: https://docs.nuapay.com/api/images/logo.png
+host: api.nuapay.com
+basePath: /
+tags:
+- name: Webhooks
+  description: Webhooks configuration endpoints
+- name: Webhooks-Events
+  description: Webhook Events
+schemes:
+- http
+paths:
+  /eventTypes:
+    get:
+      tags:
+      - Webhooks-Events
+      summary: List webhook events
+      description: List webhook events
+      operationId: listWebhookEventsUsingGET
+      produces:
+      - '*/*'
+      parameters: []
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/EventTypeCollectionResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /eventTypes/{eventId}:
+    get:
+      tags:
+      - Webhooks-Events
+      summary: Get webhook event
+      description: Return single webhook event
+      operationId: getWebhookEventUsingGET
+      produces:
+      - '*/*'
+      parameters:
+      - name: eventId
+        in: path
+        description: eventId
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /eventTypes/{eventId}/resend:
+    post:
+      tags:
+      - Webhooks-Events
+      summary: Resend webhook event
+      description: Resend single webhook event
+      operationId: resendWebhookEventUsingPOST
+      consumes:
+      - application/json
+      produces:
+      - '*/*'
+      parameters:
+      - name: eventId
+        in: path
+        description: eventId
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /webhooks:
+    get:
+      tags:
+      - Webhooks
+      summary: List webhooks
+      description: Return list of webhook items
+      operationId: listWebhooksUsingGET
+      produces:
+      - '*/*'
+      parameters:
+      - name: active
+        in: query
+        required: false
+        type: string
+        pattern: true|false
+      - name: createdatefrom
+        in: query
+        required: false
+        type: string
+        pattern: ^[0-9]{4}[-][0-9]{2}[-]{1}[0-9]{2}$
+      - name: createdateto
+        in: query
+        required: false
+        type: string
+        pattern: ^[0-9]{4}[-][0-9]{2}[-]{1}[0-9]{2}$
+      - name: name
+        in: query
+        required: false
+        type: string
+        maxLength: 70
+        minLength: 0
+      - name: orderby
+        in: query
+        required: false
+        type: string
+      - name: pagenumber
+        in: query
+        required: false
+        type: string
+      - name: pagesize
+        in: query
+        required: false
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WebhookCollectionResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        422:
+          description: Business validations failed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    post:
+      tags:
+      - Webhooks
+      summary: Create Webhook
+      description: Registers new Webhook configuration
+      operationId: createWebhookUsingPOST
+      consumes:
+      - application/json
+      produces:
+      - application/json;charset=UTF-8
+      parameters:
+      - in: body
+        name: webhookRequest
+        description: webhookRequest
+        required: true
+        schema:
+          $ref: '#/definitions/WebhookRequest'
+      responses:
+        201:
+          description: Created
+          schema:
+            $ref: '#/definitions/WebhookResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        422:
+          description: Business validations failed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /webhooks/disableAll:
+    post:
+      tags:
+      - Webhooks
+      summary: Disable All
+      description: Disable all Webhook items
+      operationId: disableAllWebhooksUsingPOST
+      consumes:
+      - application/json
+      produces:
+      - '*/*'
+      parameters: []
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WebhookStateChangeResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /webhooks/enableAll:
+    post:
+      tags:
+      - Webhooks
+      summary: Enable All
+      description: Enable all Webhook items
+      operationId: enableAllWebhooksUsingPOST
+      consumes:
+      - application/json
+      produces:
+      - '*/*'
+      parameters: []
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WebhookStateChangeResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /webhooks/eventTypes:
+    get:
+      tags:
+      - Webhooks
+      summary: Event Types
+      description: Return list of event types
+      operationId: getEventTypesUsingGET
+      produces:
+      - '*/*'
+      parameters: []
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /webhooks/{webhookId}:
+    get:
+      tags:
+      - Webhooks
+      summary: Get Webhook
+      description: Retusingle Webhook element
+      operationId: getWebhookUsingGET
+      produces:
+      - '*/*'
+      parameters:
+      - name: webhookId
+        in: path
+        description: webhookId
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WebhookResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    put:
+      tags:
+      - Webhooks
+      summary: Update Webhook
+      description: Updates registed Webhook configuration
+      operationId: updateWebhookUsingPUT
+      consumes:
+      - application/json
+      produces:
+      - application/json;charset=UTF-8
+      parameters:
+      - name: webhookId
+        in: path
+        description: webhookId
+        required: true
+        type: string
+      - in: body
+        name: webhookRequest
+        description: webhookRequest
+        required: true
+        schema:
+          $ref: '#/definitions/WebhookRequest'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WebhookResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        422:
+          description: Business validations failed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    delete:
+      tags:
+      - Webhooks
+      summary: Delete Webhook
+      description: Delete existing Webhook configuration
+      operationId: deleteWebhookUsingDELETE
+      produces:
+      - '*/*'
+      parameters:
+      - name: webhookId
+        in: path
+        description: webhookId
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /webhooks/{webhookId}/disable:
+    post:
+      tags:
+      - Webhooks
+      summary: Disable Webhook
+      description: Disable existing Webhook configuration
+      operationId: disableWebhookUsingPOST
+      consumes:
+      - application/json
+      produces:
+      - '*/*'
+      parameters:
+      - name: webhookId
+        in: path
+        description: webhookId
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WebhookResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+  /webhooks/{webhookId}/enable:
+    post:
+      tags:
+      - Webhooks
+      summary: Enable Webhook
+      description: Enable existing Webhook configuration
+      operationId: enableWebhookUsingPOST
+      consumes:
+      - application/json
+      produces:
+      - '*/*'
+      parameters:
+      - name: webhookId
+        in: path
+        description: webhookId
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WebhookResponseEnvelope'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Bad credentials
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - OriginatorOAuth2: []
+      - OriginatorApiKey: []
+      deprecated: false
+    parameters: []
+securityDefinitions:
+  OriginatorApiKey:
+    type: basic
+  OriginatorOAuth2:
+    type: oauth2
+    tokenUrl: https://api.nuapay.com/oauth/token_key
+    flow: password
+    scopes:
+      ui: Authentication with username and password
+definitions:
+  ErrorDetail:
+    type: object
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      field:
+        type: string
+      resourceUri:
+        type: string
+    title: ErrorDetail
+  ErrorResponse:
+    type: object
+    properties:
+      details:
+        type: array
+        items:
+          $ref: '#/definitions/ErrorDetail'
+      returnCode:
+        type: string
+      returnDescription:
+        type: string
+    title: ErrorResponse
+  EventTypeCollectionResponse:
+    type: object
+    properties:
+      uri:
+        type: string
+        description: Resource Uri
+      data:
+        type: array
+        description: Webhook resource
+        items:
+          $ref: '#/definitions/EventTypeResponse'
+    title: EventTypeCollectionResponse
+  EventTypeResponse:
+    type: object
+    properties:
+      eventType:
+        type: string
+        description: Event type
+      resourceType:
+        type: string
+        description: Resource type
+    title: EventTypeResponse
+  OrganizationCollectionResponseDTO:
+    type: object
+    properties:
+      uri:
+        type: string
+        description: Resource Uri
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/OrganizationResponseDTO'
+      page:
+        $ref: '#/definitions/RestResponsePaginationDetails'
+      sort:
+        type: array
+        description: Sorting
+        items:
+          type: string
+    title: OrganizationCollectionResponseDTO
+  OrganizationResponseDTO:
+    type: object
+    properties:
+      active:
+        type: boolean
+      id:
+        type: string
+      organizationRef:
+        type: integer
+        format: int64
+      supportedEvents:
+        type: array
+        items:
+          type: string
+      uri:
+        type: string
+    title: OrganizationResponseDTO
+  RestResponsePaginationDetails:
+    type: object
+    properties:
+      pageNumber:
+        type: integer
+        format: int32
+      pageSize:
+        type: integer
+        format: int32
+      totalElements:
+        type: integer
+        format: int32
+      totalPages:
+        type: integer
+        format: int32
+    title: RestResponsePaginationDetails
+  WebhookCollectionResponseEnvelope:
+    type: object
+    properties:
+      uri:
+        type: string
+        description: Resource Uri
+      data:
+        type: array
+        description: Webhook resource
+        items:
+          $ref: '#/definitions/WebhookResponse'
+      page:
+        $ref: '#/definitions/RestResponsePaginationDetails'
+      sort:
+        type: array
+        description: Sorting
+        items:
+          type: string
+    title: WebhookCollectionResponseEnvelope
+  WebhookRequest:
+    type: object
+    properties:
+      active:
+        type: boolean
+        description: Indicates if webhook is active and events are sent to callback
+          URL
+      retryNumberOfDays:
+        type: integer
+        format: int32
+        description: The number that specifies how many days retrying should be done
+      name:
+        type: string
+        description: Name of webhook configuration
+        minLength: 0
+        maxLength: 70
+      signKey:
+        type: string
+        description: Secret used to sign body of message sent to callback URL
+        minLength: 0
+        maxLength: 255
+      targetUrl:
+        type: string
+        description: URL where call will be made
+        minLength: 0
+        maxLength: 2048
+      eventTypes:
+        type: array
+        description: List of event types sent to given callback URL
+        items:
+          type: string
+    title: WebhookRequest
+  WebhookResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Resource identifier
+      uri:
+        type: string
+        description: Resource Uri
+      creationDate:
+        type: string
+        format: date-time
+        description: Webhook creation date
+      active:
+        type: boolean
+        description: Indicates if webhook is active and events are sent to callback
+          URL
+      retryNumberOfDays:
+        type: integer
+        format: int32
+        description: The number that specifies how many days retrying should be done
+      name:
+        type: string
+        description: Name of webhook configuration
+        minLength: 0
+        maxLength: 70
+      signKey:
+        type: string
+        description: Secret used to sign body of message sent to callback URL
+        minLength: 0
+        maxLength: 255
+      targetUrl:
+        type: string
+        description: URL where call will be made
+        minLength: 0
+        maxLength: 2048
+      eventTypes:
+        type: array
+        description: List of event types sent to given callback URL
+        items:
+          type: string
+    title: WebhookResponse
+  WebhookResponseEnvelope:
+    type: object
+    properties:
+      uri:
+        type: string
+        description: Resource Uri
+      data:
+        $ref: '#/definitions/WebhookResponse'
+    title: WebhookResponseEnvelope
+  WebhookStateChangeResponse:
+    type: object
+    properties:
+      uri:
+        type: string
+        description: Resource Uri
+      resourcesUpdated:
+        type: integer
+        format: int32
+        description: Number of resource updated
+      resourcesIds:
+        type: string
+        description: A list of resource Ids
+    title: WebhookStateChangeResponse
+  WebhookStateChangeResponseEnvelope:
+    type: object
+    properties:
+      uri:
+        type: string
+        description: Resource Uri
+      data:
+        $ref: '#/definitions/WebhookStateChangeResponse'
+    title: WebhookStateChangeResponseEnvelope
