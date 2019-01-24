@@ -1,590 +1,861 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  description: Webhooks REST API
-  version: "1.0"
+  description: 'Webhooks REST API'
+  version: '1.0'
   title: Webhooks REST API
   termsOfService: For internal use only
   contact:
     name: sentenial
-    url: http://sentenial.com
+    url: 'http://sentenial.com'
     email: engineering@sentenial.com
   license:
     name: For internal use only
-    url: https://sentenial.com
+    url: 'https://sentenial.com'
   x-logo:
     backgroundColor: '#FFFFFF'
-    url: https://docs.nuapay.com/api/images/logo.png
+    url: 'https://docs.nuapay.com/api/images/logo.png'
 host: api.nuapay.com
 basePath: /
 tags:
-- name: Webhooks
-  description: Webhooks configuration endpoints
-- name: Webhooks-Events
-  description: Webhook Events
-schemes:
-- http
+  - name: Webhooks
+    description: Webhooks configuration endpoints
+  - name: Webhooks-Events
+    description: Webhook Events
 paths:
   /eventTypes:
     get:
       tags:
-      - Webhooks-Events
+        - Webhooks-Events
       summary: List webhook events
       description: List webhook events
       operationId: listWebhookEventsUsingGET
       produces:
-      - '*/*'
-      parameters: []
+        - application/json
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/EventTypeCollectionResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              uri: "/eventTypes"
+              data:
+              - eventType: OpenBankingPayment
+                resourceType: OpenBankingPayment
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
-    parameters: []
-  /eventTypes/{eventId}:
-    get:
-      tags:
-      - Webhooks-Events
-      summary: Get webhook event
-      description: Return single webhook event
-      operationId: getWebhookEventUsingGET
-      produces:
-      - '*/*'
-      parameters:
-      - name: eventId
-        in: path
-        description: eventId
-        required: true
-        type: string
-      responses:
-        200:
-          description: OK
-        400:
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
-      deprecated: false
-    parameters: []
-  /eventTypes/{eventId}/resend:
-    post:
-      tags:
-      - Webhooks-Events
-      summary: Resend webhook event
-      description: Resend single webhook event
-      operationId: resendWebhookEventUsingPOST
-      consumes:
-      - application/json
-      produces:
-      - '*/*'
-      parameters:
-      - name: eventId
-        in: path
-        description: eventId
-        required: true
-        type: string
-      responses:
-        200:
-          description: OK
-        400:
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
-      deprecated: false
-    parameters: []
   /webhooks:
     get:
       tags:
-      - Webhooks
+        - Webhooks
       summary: List webhooks
       description: Return list of webhook items
       operationId: listWebhooksUsingGET
       produces:
-      - '*/*'
+        - application/json
       parameters:
-      - name: active
-        in: query
-        required: false
-        type: string
-        pattern: true|false
-      - name: createdatefrom
-        in: query
-        required: false
-        type: string
-        pattern: ^[0-9]{4}[-][0-9]{2}[-]{1}[0-9]{2}$
-      - name: createdateto
-        in: query
-        required: false
-        type: string
-        pattern: ^[0-9]{4}[-][0-9]{2}[-]{1}[0-9]{2}$
-      - name: name
-        in: query
-        required: false
-        type: string
-        maxLength: 70
-        minLength: 0
-      - name: orderby
-        in: query
-        required: false
-        type: string
-      - name: pagenumber
-        in: query
-        required: false
-        type: string
-      - name: pagesize
-        in: query
-        required: false
-        type: string
+        - name: active
+          in: query
+          required: false
+          type: boolean
+          description: Flag allow to filter only 'active' or 'invactive' webhooks. If not provided all webhooks are returned.
+        - name: createdatefrom
+          in: query
+          required: false
+          type: string
+          format: date
+          description: Create date from.
+        - name: createdateto
+          in: query
+          required: false
+          type: string
+          format: date
+          description: Create date to.
+        - name: name
+          in: query
+          required: false
+          type: string
+          maxLength: 70
+          description: Webhook name.
+        - name: orderby
+          in: query
+          required: false
+          type: string
+          description: Order query by, default 'id' in descending order
+        - name: pagenumber
+          in: query
+          required: false
+          type: integer
+          format: int32
+          description: Page Number
+          default: 1
+        - name: pagesize
+          in: query
+          required: false
+          type: integer
+          format: int32
+          description: Page size
+          default: 20
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/WebhookCollectionResponseEnvelope'
-        400:
+          examples:
+            application/json:
+              uri: "/webhooks"
+              data:
+              - id: 8kd28yoml3
+                uri: "/webhooks/8kd28yoml3"
+                name: Open Banking Payment
+                active: true
+                retryNumberOfDays: 1
+                signKey: TOddned3vb
+                targetUrl: http://example.com/webhooks/listen
+                eventTypes:
+                - PaymentReceived
+                creationDate: '2018-01-23'
+              page:
+                pageNumber: 1
+                pageSize: 20
+                totalElements: 1
+                totalPages: 1
+              sort: []
+        '400':
           description: Bad request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: '40000'
+              returnDescription: Input validation errors
+              details:
+              - code: '40011'
+                field: createdatefrom
+                description: Date format is invalid
+                resourceUri: 
+              - code: '40011'
+                field: createdateto
+                description: Date format is invalid
+                resourceUri: 
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Not found
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/ErrorResponse'
-        422:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '422':
           description: Business validations failed
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: '40000'
+              returnDescription: Input validation errors
+              details:
+              - code: '40016'
+                field: pagesize
+                description: Max page size is exceeded
+                resourceUri: 
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
     post:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Create Webhook
       description: Registers new Webhook configuration
       operationId: createWebhookUsingPOST
       consumes:
-      - application/json
+        - application/json
       produces:
-      - application/json;charset=UTF-8
+        - application/json
       parameters:
-      - in: body
-        name: webhookRequest
-        description: webhookRequest
-        required: true
-        schema:
-          $ref: '#/definitions/WebhookRequest'
+        - in: body
+          name: webhookRequest
+          description: webhookRequest
+          required: true
+          schema:
+            $ref: '#/definitions/WebhookRequest'
       responses:
-        201:
+        '201':
           description: Created
           schema:
             $ref: '#/definitions/WebhookResponseEnvelope'
-        400:
+          examples:
+            application/json:
+              uri: "/webhooks/8kd28yoml3"
+              data:
+                id: 8kd28yoml3
+                uri: "/webhooks/8kd28yoml3"
+                name: Open Banking Payment
+                active: true
+                retryNumberOfDays: 1
+                signKey: TOddned3vb
+                targetUrl: http://example.com/webhooks/listen
+                eventTypes:
+                - PaymentReceived
+                creationDate: '2018-01-23'
+        '400':
           description: Bad request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: '40000'
+              returnDescription: Input validation errors
+              details:
+              - code: '40001'
+                field: eventTypes
+                description: Field is required
+                resourceUri: 
+              - code: '40003'
+                field: active
+                description: Boolean parameter value must be either 'true' or 'false'
+                resourceUri: 
+              - code: '40007'
+                field: targetUrl
+                description: Target URL is invalid or max length is exceeded
+                resourceUri: 
+              - code: '40017'
+                field: retryNumberOfDays
+                description: Retry Number of Days is invalid
+                resourceUri: 
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Not found
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/ErrorResponse'
-        422:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '422':
           description: Business validations failed
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: '40000'
+              returnDescription: Input validation errors
+              details:
+              - code: '40006'
+                field: eventTypes
+                description: Not supported Event Type
+                resourceUri: 
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
-    parameters: []
   /webhooks/disableAll:
     post:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Disable All
       description: Disable all Webhook items
       operationId: disableAllWebhooksUsingPOST
-      consumes:
-      - application/json
       produces:
-      - '*/*'
-      parameters: []
+        - application/json
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/WebhookStateChangeResponseEnvelope'
-        400:
-          description: Bad request
+          examples:
+            application/json:
+              uri: "/webhooks/disableAll"
+              data:
+                uri: "/webhooks/disableAll"
+                resourcesUpdated: 2
+                resourcesIds: 8kd28yoml3,lk4m683ba7
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
-    parameters: []
   /webhooks/enableAll:
     post:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Enable All
       description: Enable all Webhook items
       operationId: enableAllWebhooksUsingPOST
-      consumes:
-      - application/json
       produces:
-      - '*/*'
-      parameters: []
+        - application/json
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/WebhookStateChangeResponseEnvelope'
-        400:
-          description: Bad request
+          examples:
+            application/json:
+              uri: "/webhooks/enableAll"
+              data:
+                uri: "/webhooks/enableAll"
+                resourcesUpdated: 2
+                resourcesIds: 8kd28yoml3,lk4m683ba7
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
-    parameters: []
-  /webhooks/eventTypes:
-    get:
-      tags:
-      - Webhooks
-      summary: Event Types
-      description: Return list of event types
-      operationId: getEventTypesUsingGET
-      produces:
-      - '*/*'
-      parameters: []
-      responses:
-        200:
-          description: OK
-        400:
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
-      deprecated: false
-    parameters: []
   /webhooks/{webhookId}:
     get:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Get Webhook
       description: Retusingle Webhook element
       operationId: getWebhookUsingGET
       produces:
-      - '*/*'
+        - application/json
       parameters:
-      - name: webhookId
-        in: path
-        description: webhookId
-        required: true
-        type: string
+        - name: webhookId
+          in: path
+          description: webhookId
+          required: true
+          type: string
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/WebhookResponseEnvelope'
-        400:
-          description: Bad request
+          examples:
+            application/json:
+              uri: "/webhooks/8kd28yoml3"
+              data:
+                id: 8kd28yoml3
+                uri: "/webhooks/8kd28yoml3"
+                name: Open Banking Payment
+                active: true
+                retryNumberOfDays: 2
+                signKey: W0eyYmYxFU
+                targetUrl: http://example.com/webhooks/listen
+                eventTypes:
+                - PaymentReceived
+                creationDate: '2019-01-23'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
     put:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Update Webhook
       description: Updates registed Webhook configuration
       operationId: updateWebhookUsingPUT
       consumes:
-      - application/json
+        - application/json
       produces:
-      - application/json;charset=UTF-8
+        - application/json
       parameters:
-      - name: webhookId
-        in: path
-        description: webhookId
-        required: true
-        type: string
-      - in: body
-        name: webhookRequest
-        description: webhookRequest
-        required: true
-        schema:
-          $ref: '#/definitions/WebhookRequest'
+        - name: webhookId
+          in: path
+          description: webhookId
+          required: true
+          type: string
+        - in: body
+          name: webhookRequest
+          description: webhookRequest
+          required: true
+          schema:
+            $ref: '#/definitions/WebhookRequest'
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/WebhookResponseEnvelope'
-        400:
+          examples:
+            application/json:
+              uri: "/webhooks/8kd28yoml3"
+              data:
+                id: 8kd28yoml3
+                uri: "/webhooks/8kd28yoml3"
+                name: Open Banking Payment
+                active: true
+                retryNumberOfDays: 2
+                signKey: W0eyYmYxFU
+                targetUrl: http://example.com/webhooks/listen
+                eventTypes:
+                - PaymentReceived
+                creationDate: '2019-01-23'
+        '400':
           description: Bad request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: '40000'
+              returnDescription: Input validation errors
+              details:
+              - code: '40001'
+                field: eventTypes
+                description: Field is required
+                resourceUri: 
+              - code: '40003'
+                field: active
+                description: Boolean parameter value must be either 'true' or 'false'
+                resourceUri: 
+              - code: '40007'
+                field: targetUrl
+                description: Target URL is invalid or max length is exceeded
+                resourceUri: 
+              - code: '40017'
+                field: retryNumberOfDays
+                description: Retry Number of Days is invalid
+                resourceUri: 
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        422:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '422':
           description: Business validations failed
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: '40000'
+              returnDescription: Input validation errors
+              details:
+              - code: '40006'
+                field: eventTypes
+                description: Not supported Event Type
+                resourceUri: 
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
     delete:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Delete Webhook
       description: Delete existing Webhook configuration
       operationId: deleteWebhookUsingDELETE
-      produces:
-      - '*/*'
       parameters:
-      - name: webhookId
-        in: path
-        description: webhookId
-        required: true
-        type: string
+        - name: webhookId
+          in: path
+          description: webhookId
+          required: true
+          type: string
       responses:
-        200:
+        '200':
           description: OK
-        400:
-          description: Bad request
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
-    parameters: []
   /webhooks/{webhookId}/disable:
     post:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Disable Webhook
       description: Disable existing Webhook configuration
       operationId: disableWebhookUsingPOST
-      consumes:
-      - application/json
       produces:
-      - '*/*'
+        - application/json
       parameters:
-      - name: webhookId
-        in: path
-        description: webhookId
-        required: true
-        type: string
+        - name: webhookId
+          in: path
+          description: webhookId
+          required: true
+          type: string
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/WebhookResponseEnvelope'
-        400:
+          examples:
+            application/json:
+              uri: "/webhooks/8kd28yoml3"
+              data:
+                id: 8kd28yoml3
+                uri: "/webhooks/8kd28yoml3"
+                name: Open Banking Payment
+                active: false
+                retryNumberOfDays: 2
+                signKey: W0eyYmYxFU
+                targetUrl: http://example.com/webhooks/listen
+                eventTypes:
+                - PaymentReceived
+                creationDate: '2019-01-23'
+
+        '400':
           description: Bad request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
-    parameters: []
   /webhooks/{webhookId}/enable:
     post:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Enable Webhook
       description: Enable existing Webhook configuration
       operationId: enableWebhookUsingPOST
       consumes:
-      - application/json
+        - application/json
       produces:
-      - '*/*'
+        - application/json
       parameters:
-      - name: webhookId
-        in: path
-        description: webhookId
-        required: true
-        type: string
+        - name: webhookId
+          in: path
+          description: webhookId
+          required: true
+          type: string
       responses:
-        200:
+        '200':
           description: OK
           schema:
             $ref: '#/definitions/WebhookResponseEnvelope'
-        400:
+          examples:
+            application/json:
+              uri: "/webhooks/8kd28yoml3"
+              data:
+                id: 8kd28yoml3
+                uri: "/webhooks/8kd28yoml3"
+                name: Open Banking Payment
+                active: true
+                retryNumberOfDays: 2
+                signKey: W0eyYmYxFU
+                targetUrl: http://example.com/webhooks/listen
+                eventTypes:
+                - PaymentReceived
+                creationDate: '2019-01-23'
+        '400':
           description: Bad request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Bad credentials
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Access denied
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
+        '405':
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              returnCode: null
+              returnDescription: null
+              details: null  
       security:
-      - OriginatorOAuth2: []
-      - OriginatorApiKey: []
+        - OriginatorOAuth2:
+          - webhooks
+        - OriginatorApiKey: []
       deprecated: false
-    parameters: []
 securityDefinitions:
   OriginatorApiKey:
     type: basic
   OriginatorOAuth2:
     type: oauth2
-    tokenUrl: https://api.nuapay.com/oauth/token_key
+    tokenUrl: 'https://api.nuapay.com/oauth/token_key'
     flow: password
     scopes:
-      ui: Authentication with username and password
+      webhooks: Webhooks configuration access.
 definitions:
   ErrorDetail:
     type: object
@@ -707,33 +978,38 @@ definitions:
     properties:
       active:
         type: boolean
-        description: Indicates if webhook is active and events are sent to callback
-          URL
+        description: Indicates if webhook is active and events are sent to target URL
       retryNumberOfDays:
         type: integer
         format: int32
         description: The number that specifies how many days retrying should be done
+        minimum: 1
+        maximum: 3
       name:
         type: string
         description: Name of webhook configuration
-        minLength: 0
         maxLength: 70
       signKey:
         type: string
-        description: Secret used to sign body of message sent to callback URL
-        minLength: 0
+        description: Secret used to sign body of message sent to target URL. If not provided will be autogenerated by the system.
         maxLength: 255
       targetUrl:
         type: string
-        description: URL where call will be made
-        minLength: 0
+        description: URL where call will be made.
         maxLength: 2048
       eventTypes:
         type: array
-        description: List of event types sent to given callback URL
+        description: "List of event types sent to given target URL. For evenTypes available visit <a href='https://sentenial.github.io/developer-docs/ob_whoverview.html' target='_blank' > Webhooks Overview </a>"
         items:
           type: string
     title: WebhookRequest
+    example:
+      name: Open Banking Payment
+      targetUrl: http://example.com/webhooks/listen
+      active: true
+      retryNumberOfDays: 1
+      eventTypes:
+      - PaymentReceived
   WebhookResponse:
     type: object
     properties:
@@ -749,30 +1025,28 @@ definitions:
         description: Webhook creation date
       active:
         type: boolean
-        description: Indicates if webhook is active and events are sent to callback
-          URL
+        description: Indicates if webhook is active and events are sent to target URL
       retryNumberOfDays:
         type: integer
         format: int32
         description: The number that specifies how many days retrying should be done
+        minimum: 1
+        maximum: 3
       name:
         type: string
         description: Name of webhook configuration
-        minLength: 0
         maxLength: 70
       signKey:
         type: string
-        description: Secret used to sign body of message sent to callback URL
-        minLength: 0
+        description: Secret used to sign body of message sent to target URL
         maxLength: 255
       targetUrl:
         type: string
         description: URL where call will be made
-        minLength: 0
         maxLength: 2048
       eventTypes:
         type: array
-        description: List of event types sent to given callback URL
+        description: List of event types sent to given target URL.
         items:
           type: string
     title: WebhookResponse
